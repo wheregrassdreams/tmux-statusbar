@@ -29,8 +29,8 @@ mkdir -p "$cache_root"
 tmp_binary="$(mktemp "$binary.XXXXXX")"
 tmp_checksum="$tmp_binary.sha256"
 trap 'rm -f "$tmp_binary" "$tmp_checksum"' EXIT
-curl --fail --location --silent --show-error "$release/$asset" -o "$tmp_binary"
-curl --fail --location --silent --show-error "$release/$asset.sha256" -o "$tmp_checksum"
+curl --connect-timeout 5 --max-time 15 --fail --location --silent --show-error "$release/$asset" -o "$tmp_binary"
+curl --connect-timeout 5 --max-time 15 --fail --location --silent --show-error "$release/$asset.sha256" -o "$tmp_checksum"
 
 expected="$(cat "$tmp_checksum")"
 if [[ "$checksum_tool" == shasum ]]; then
