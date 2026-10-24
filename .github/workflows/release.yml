@@ -1,0 +1,52 @@
+name: Release session marquee
+
+on:
+  push:
+    tags:
+      - 'tmux-statusbar-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Build and checksum binary
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' session-marquee/Cargo.toml | head -n 1)"
+          [[ "$GITHUB_REF_NAME" == "tmux-statusbar-v$version" ]]
+          cargo build --locked --release --manifest-path session-marquee/Cargo.toml --target "${{ matrix.target }}"
+          name="session-marquee-$version-${{ matrix.target }}"
+          mkdir -p release
+          cp "session-marquee/target/${{ matrix.target }}/release/session-marquee" "release/$name"
+          shasum -a 256 "release/$name" | cut -d ' ' -f 1 > "release/$name.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: release/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*

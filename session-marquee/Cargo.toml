@@ -1,0 +1,13 @@
+[package]
+name = "tmux-statusbar-session-marquee"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "session-marquee"
+path = "src/main.rs"
+
+[dependencies]
+unicode-segmentation = "1.12"
+unicode-width = "0.2"
