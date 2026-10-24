@@ -8,6 +8,10 @@ a Rust toolchain are not required. If the release is unavailable, the platform
 is unsupported, or the download cannot be verified, tmux itself truncates the
 session name to the badge width.
 
+While this repository is private, authenticate with GitHub CLI (`gh auth login`)
+to download its release assets. Once public, the plugin can fetch them with
+`curl` alone.
+
 ## Install
 
 ```tmux
